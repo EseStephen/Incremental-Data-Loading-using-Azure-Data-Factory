@@ -1,0 +1,154 @@
+{
+    "name": "scd1dataflow",
+    "properties": {
+        "type": "MappingDataFlow",
+        "typeProperties": {
+            "sources": [
+                {
+                    "dataset": {
+                        "referenceName": "employee2source",
+                        "type": "DatasetReference"
+                    },
+                    "name": "EmployeesUpdated"
+                },
+                {
+                    "dataset": {
+                        "referenceName": "AzureSqlTableEmployee",
+                        "type": "DatasetReference"
+                    },
+                    "name": "ExistingEmployees"
+                }
+            ],
+            "sinks": [
+                {
+                    "dataset": {
+                        "referenceName": "AzureSqlTableEmployee",
+                        "type": "DatasetReference"
+                    },
+                    "name": "sink"
+                },
+                {
+                    "dataset": {
+                        "referenceName": "AzureSqlTableEmployee",
+                        "type": "DatasetReference"
+                    },
+                    "name": "sink2"
+                }
+            ],
+            "transformations": [
+                {
+                    "name": "join"
+                },
+                {
+                    "name": "derivedColumn"
+                },
+                {
+                    "name": "filter1"
+                },
+                {
+                    "name": "select"
+                },
+                {
+                    "name": "filter2"
+                },
+                {
+                    "name": "alterRow1"
+                },
+                {
+                    "name": "alterRow2"
+                },
+                {
+                    "name": "select1"
+                }
+            ],
+            "scriptLines": [
+                "source(output(",
+                "          EmployeeID as integer,",
+                "          Name as string,",
+                "          Salary as integer,",
+                "          Location as string",
+                "     ),",
+                "     allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     ignoreNoFilesFound: false) ~> EmployeesUpdated",
+                "source(output(",
+                "          EmployeeID as integer,",
+                "          Name as string,",
+                "          Salary as decimal(10,2),",
+                "          Location as string",
+                "     ),",
+                "     allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     isolationLevel: 'READ_UNCOMMITTED',",
+                "     format: 'table') ~> ExistingEmployees",
+                "EmployeesUpdated, ExistingEmployees join(EmployeesUpdated@EmployeeID == ExistingEmployees@EmployeeID,",
+                "     joinType:'left',",
+                "     matchType:'exact',",
+                "     ignoreSpaces: false,",
+                "     broadcast: 'auto')~> join",
+                "join derive(IsUpdated = iif(EmployeesUpdated@Salary != ExistingEmployees@Salary, 1, 0),",
+                "          IsNew = iif(isNull(ExistingEmployees@EmployeeID), 1, 0)\r",
+                ") ~> derivedColumn",
+                "derivedColumn filter(IsUpdated == 1) ~> filter1",
+                "alterRow1 select(mapColumn(",
+                "          EmployeeID = EmployeesUpdated@EmployeeID,",
+                "          Name = EmployeesUpdated@Name,",
+                "          Salary = EmployeesUpdated@Salary,",
+                "          Location = EmployeesUpdated@Location",
+                "     ),",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> select",
+                "derivedColumn filter(IsNew == 1) ~> filter2",
+                "filter1 alterRow(updateIf(IsUpdated == 1)) ~> alterRow1",
+                "filter2 alterRow(insertIf(IsNew == 1)) ~> alterRow2",
+                "alterRow2 select(mapColumn(",
+                "          EmployeeID = EmployeesUpdated@EmployeeID,",
+                "          Name = EmployeesUpdated@Name,",
+                "          Salary = EmployeesUpdated@Salary,",
+                "          Location = EmployeesUpdated@Location",
+                "     ),",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> select1",
+                "select sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     input(",
+                "          EmployeeID as integer,",
+                "          Name as string,",
+                "          Salary as decimal(10,2),",
+                "          Location as string",
+                "     ),",
+                "     deletable:false,",
+                "     insertable:false,",
+                "     updateable:true,",
+                "     upsertable:false,",
+                "     keys:['EmployeeID'],",
+                "     format: 'table',",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true,",
+                "     errorHandlingOption: 'stopOnFirstError',",
+                "     mapColumn(",
+                "          EmployeeID,",
+                "          Name,",
+                "          Salary,",
+                "          Location",
+                "     )) ~> sink",
+                "select1 sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     input(",
+                "          EmployeeID as integer,",
+                "          Name as string,",
+                "          Salary as decimal(10,2),",
+                "          Location as string",
+                "     ),",
+                "     deletable:false,",
+                "     insertable:true,",
+                "     updateable:false,",
+                "     upsertable:false,",
+                "     format: 'table',",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true,",
+                "     errorHandlingOption: 'stopOnFirstError') ~> sink2"
+            ]
+        }
+    }
+}
