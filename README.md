@@ -1,3 +1,4 @@
+# Incremwntal-Data-Loading-using-Azure-Data-Factory
 📝 Overview<br>
 This project demonstrates a four-stage incremental data loading process using Azure Data Factory (ADF) and Azure SQL Database. The goal is to efficiently load and update data while preventing duplication and optimizing performance.
 
