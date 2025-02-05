@@ -91,7 +91,8 @@ AND NOT EXISTS (<br>
     SELECT 1 FROM [dbo].[Customer] c WHERE c.customer_id = o.customer_id<br>
 )
 
-
+✔ Loads only new records based on insert_time.<br>
+✔ Prevents duplicate customers using NOT EXISTS.<br>
 
 
 
