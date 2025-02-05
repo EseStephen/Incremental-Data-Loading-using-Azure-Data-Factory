@@ -1,0 +1,6 @@
+order_id,customer_id,first_name,last_name,order_amount,order_date
+1011,2008,Olivia,Taylor,180.5,2024-01-25
+1012,2009,Noah,Miller,250.75,2024-01-26
+1013,2010,Sophia,Anderson,310,2024-01-27
+1014,2002,Jane,Smith,220.4,2024-01-28
+1015,2006,Emma,Brown,195.6,2024-01-29
