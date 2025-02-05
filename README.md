@@ -57,3 +57,41 @@ CREATE TABLE Customer (<br>
     insert_time DATETIME DEFAULT GETDATE()<br>
 );
 
+🔄 Pipeline 3: New Orders Data<br>
+Purpose: Loads new orders from another CSV file into the Orders table.<br>
+
+📌 Activities:<br>
+1️⃣ Source Dataset: Points to orders_dataset_incremental.csv.<br>
+2️⃣ Copy Data Activity: Inserts new records into Orders.
+
+🔄 Pipeline 4: Incremental Data Loading<br>
+Purpose: Ensures that only new data is copied to the Customer table based on insert_time.<br>
+
+📌 Activities:<br>
+1️⃣ Lookup Activity: Fetches the most recent insert_time from Orders.<br>
+2️⃣ Set Variable Activity: Stores the latest timestamp.<br>
+3️⃣ Copy Data Activity: Transfers only new customers from Orders to Customer.
+
+🛠️ How Incremental Loading Works<br>
+📜 Step 1: Lookup Last Insert Time<br>
+SELECT CONVERT(VARCHAR, MAX(insert_time), 120) AS last_insert_time FROM [dbo].[Orders]<br>
+Retrieves the most recent insert_time from Orders.<br>
+The result is stored in the Set Variable Activity.<br>
+
+📜 Step 2: Set Variable<br>
+Create Pipeline variable (LastInsertTime)<br>
+@activity('LookupOrdersTable').output.firstRow.last_insert_time<br>
+
+📜 Step 3: Filter Only New Data in Copy Data Activity<br>
+Query<br>
+SELECT DISTINCT o.customer_id, o.first_name, o.last_name, o.insert_time<br>
+FROM [dbo].[Orders] o<br>
+WHERE o.insert_time > CONVERT(DATETIME, '@{variables('LastInsertTime')}', 120)<br>
+AND NOT EXISTS (<br>
+    SELECT 1 FROM [dbo].[Customer] c WHERE c.customer_id = o.customer_id<br>
+)
+
+
+
+
+
