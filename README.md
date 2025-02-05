@@ -8,6 +8,10 @@ This project demonstrates a four-stage incremental data loading process using Az
 ✔ Implement incremental data loading to avoid reprocessing old records.<br>
 ✔ Ensure data integrity by handling duplicates and updates correctly.
 
+Resources<br>
+![image](https://github.com/user-attachments/assets/65ebb189-2a42-41c9-a48c-8e95e439ba0f)
+
+
 ⚙️ Architecture & Components<br>
 📂 Azure SQL Database Tables<br>
 Orders Table: Stores raw orders from CSV files.<br>
@@ -38,6 +42,9 @@ CREATE TABLE Orders (<br>
     insert_time DATETIME DEFAULT GETDATE()<br>
 );
 
+![Screenshot 2025-02-05 053849](https://github.com/user-attachments/assets/323596d0-4bc7-4e65-980a-5c29944c533a)
+
+
 🔄 Pipeline 2: Data Loading into Customers Table<br>
 Purpose: Extracts unique customer records from Orders and inserts them into Customer.<br>
 
@@ -57,12 +64,18 @@ CREATE TABLE Customer (<br>
     insert_time DATETIME DEFAULT GETDATE()<br>
 );
 
+![Screenshot 2025-02-05 053919](https://github.com/user-attachments/assets/efab832f-a6f0-4dbd-8e41-3115d96c793f)
+
+
 🔄 Pipeline 3: New Orders Data<br>
 Purpose: Loads new orders from another CSV file into the Orders table.<br>
 
 📌 Activities:<br>
 1️⃣ Source Dataset: Points to orders_dataset_incremental.csv.<br>
 2️⃣ Copy Data Activity: Inserts new records into Orders.
+
+![Screenshot 2025-02-05 053943](https://github.com/user-attachments/assets/6d0706bb-a699-4364-92f2-db2406a235c0)
+
 
 🔄 Pipeline 4: Incremental Data Loading<br>
 Purpose: Ensures that only new data is copied to the Customer table based on insert_time.<br>
@@ -93,6 +106,13 @@ AND NOT EXISTS (<br>
 
 ✔ Loads only new records based on insert_time.<br>
 ✔ Prevents duplicate customers using NOT EXISTS.<br>
+
+![Screenshot 2025-02-05 053815](https://github.com/user-attachments/assets/b0712517-dc30-4d5b-97ab-cbd9a52d8802)
+
+Datasets<br>
+
+Linked Service (AzureDataLakeStorageOrders & AzureSqlDatabase)
+![Screenshot 2025-02-05 190038](https://github.com/user-attachments/assets/acf83e1d-9f51-47b5-a611-e7e028675927)
 
 
 
