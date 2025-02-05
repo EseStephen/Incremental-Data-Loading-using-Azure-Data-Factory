@@ -17,7 +17,7 @@ Customer Table: Stores unique customer records.
 Pipeline Name |	Purpose<br>
 1️⃣ Data Loading into Orders Table |	Loads full dataset from CSV into the Orders table.<br>
 2️⃣ Data Loading into Customers Table | Transfers unique customers from Orders to Customer.<br>
-3️⃣ New Orders Data |	Loads only new incremental order records from another CSV file.<br>
+3️⃣ New Orders Data |	Loads new order records from another CSV file.<br>
 4️⃣ Incremental Data Loading	| Retrieves the latest timestamp and loads only new records.
 
 🔄 Pipeline 1: Data Loading into Orders Table<br>
